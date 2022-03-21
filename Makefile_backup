@@ -1,0 +1,46 @@
+NAME = bfg_9000
+OS = $(shell uname)
+
+CC = clang
+FLAGS = -Wall -Wextra -Werror
+FRAME_LINUX = -lXext -lX11
+FRAME_MAC = -framework OpenGL -framework AppKit
+
+ifeq ($(OS), Linux)
+	MLX = ./mlx/mlx_linux/
+	MLX_LINK = -L $(MLX) -l mlx $(FRAME_LINUX)
+else
+	MLX = ./mlx/mlx_mac/
+	MLX_LINK = -L $(MLX) -l mlx $(FRAME_MAC)
+endif
+
+#	HEADERS
+HEADERS_LIST =	game.h
+HEADERS_DIR = ./includes/
+HEADERS = $(addprefix $(HEADERS_DIR), $(HEADERS_LIST))
+INCLUDES = -I$(HEADERS_DIR)
+
+#	SOURCE
+SRCS_DIR = ./srcs/
+SRCS_LIST = main.c image.c close.c
+SRCS = $(addprefix $(SRCS_DIR), $(SRCS_LIST))
+
+OBJ = $(SRCS:.c=.o)
+
+all: $(NAME) clean
+
+$(NAME): $(OBJ)
+	$(CC) $(OBJ) $(MLX_LINK) -o $(NAME)
+
+%.o: %.c
+	$(CC) -I$(MLX) -c $< -o $@
+
+clean:
+	@rm -rf $(OBJ)
+
+fclean: clean
+	@rm -rf $(NAME)
+
+re: clean fclean all
+
+.PHONY: clean fclean re all
